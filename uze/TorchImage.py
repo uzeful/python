@@ -27,5 +27,6 @@ class TorchImage(data.Dataset):
 
     def get_source(self):
         img1 = self.loader(self.impath1)
+        img2 = self.loader(self.impath2)
 
         return img1

@@ -172,7 +172,7 @@ class PSPNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x):   
         out = self.conv1(x)
         out = self.maxpool(out)
         out = self.layer1(out)
@@ -182,10 +182,10 @@ class PSPNet(nn.Module):
         
         out = torch.cat([
             out,
-            self.layer5d(x),
-            self.layer5c(x),
-            self.layer5b(x),
-            self.layer5a(x),
+            self.layer5d(out),
+            self.layer5c(out),
+            self.layer5b(out),
+            self.layer5a(out),
         ], 1)
         
         out = self.fusion(out)
@@ -201,8 +201,18 @@ def pspnet101(pretrained=False, num_classes=21, **kwargs):
     """
     model = PSPNet(Bottleneck, [3, 4, 23, 3], num_classes, **kwargs)
     if pretrained:
-        #import pdb
-        #pdb.set_trace()
-        model.load_state_dict(torch.load('/data/models/pspnet101_VOC2012.pth'))
+        new_dict = {}
+        model_dict = model.state_dict()
+        pretrained_dict = torch.load('/home/uze/models/pspnet101_VOC2012.pth', map_location=lambda storage, loc: storage)
+        for k, v in pretrained_dict.items():
+            if k in model_dict:
+                param1 = pretrained_dict[k]
+                param2 = model_dict[k]
+                
+                if param1.size() == param2.size():
+                    new_dict[k] = pretrained_dict[k]
+        
+        model_dict.update(new_dict)
+        model.load_state_dict(model_dict)
     
     return model

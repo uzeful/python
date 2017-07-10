@@ -24,12 +24,14 @@ def dice_loss(input,target):
     den2=torch.sum(den2,dim=2)
     den2=torch.sum(den2,dim=3)#b,c,1,1
 
-    dice=2*(num/(den1+den2))
+    dice=2*(num/(den1+den2+1e-7))
     dice_eso=dice[:,1]#we ignore bg dice val, and take the fg
 
-    dice_total=1-1*torch.sum(dice_eso)/dice_eso.size(0)#divide by batch_sz
+    loss=1-torch.sum(dice_eso)/dice_eso.size(0)#divide by batch_sz
+    dc = (1-loss).cpu()
+    acc = probs.eq(target).float().mean()
 
-    return dice_total
+    return loss
 
 
 def dice_loss_bak(output, target):

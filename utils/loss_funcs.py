@@ -15,27 +15,25 @@ def dice_loss(output, target):
     Returns:
         tuple contains:
         + dice loss: for back-propagation
-        + accuracy: (pred - true) / true
-        + dice overlap:  2 * pred * true / (pred - true) * 100
-        + pred: FloatTensor {0.0, 1.0} with shape [batch_size * height * width, (1)]
+        + accuracy: (predtrue - true) / true
+        + dice overlap:  2 * predtrue * true / (predtrue - true) * 100
+        + predtrue: FloatTensor {0.0, 1.0} with shape [batch_size * height * width, (1)]
         + true: FloatTensor {0.0, 1.0} with shape [batch_size * height * width, (1)]
     """
-    y_pred = output.max(1)[1]  # {0, 1}
-    output = output[:, 1]
+    predict = output.max(1)[1]  # {0, 1}. 0 for the original output, 1 for the binary mask
     target = target.float()
 
     # Loss
-    # `dim = 0` for Tensor result
-    intersection = torch.sum(output * target, 0)
-    union = torch.sum(output * output, 0) + torch.sum(target * target, 0)
+    intersection = torch.sum(predict * target, 0)
+    union = torch.sum(predict * target, 0) + torch.sum(target * target, 0)
     dice = 2.0 * intersection / union
 
     # Overlap
-    pred = y_pred.eq(1).float().data    # FloatTensor 0.0 / 1.0
+    predtrue = predict.eq(1).float().data    # FloatTensor 0.0 / 1.0
     true = target.data                  # FloatTensor 0.0 / 1.0
-    overlap = 2 * (pred * true).sum() / (pred.sum() + true.sum()) * 100
+    overlap = 2 * (predtrue * true).sum() / (predtrue.sum() + true.sum()) * 100
 
     # Accuracy
-    acc = pred.eq(true).float().mean()
-    return 1 - torch.clamp(dice, 0.0, 1.0 - 1e-7), acc, overlap, pred, true
+    acc = predtrue.eq(true).float().mean()
+    return 1 - torch.clamp(dice, 0.0, 1.0 - 1e-7), acc, overlap, predtrue, true
 

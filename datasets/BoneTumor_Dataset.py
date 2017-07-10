@@ -17,7 +17,8 @@ def default_loader(path):
         return tar
     else:
         #img = np.squeeze((np.clip(sitk.GetArrayFromImage(sitk.ReadImage(path)) + 1024, 0, 2674) / 2674).astype('uint8'))
-        img = np.squeeze((np.clip(sitk.GetArrayFromImage(sitk.ReadImage(path)) + 1024, 0, 2674))).astype('float')
+        #img = np.squeeze((np.clip(sitk.GetArrayFromImage(sitk.ReadImage(path)) + 1024, 0, 2674))).astype('float')
+        img = np.squeeze((np.clip(sitk.GetArrayFromImage(sitk.ReadImage(path)) + 1024, 0, 2674))).astype('float') / 2674 * 255
         return Image.fromarray(img).convert('RGB')
 
 
@@ -34,12 +35,13 @@ def default_flist_reader(flist):
 
 
 class BoneTumor_Dataset(data.Dataset):
-    def __init__(self, root, flist, transform=None, target_transform=None, 
+    def __init__(self, root, flist, transform=None, target_transform=None, pair_transform=None,
                      flist_reader=default_flist_reader, loader=default_loader):
         self.root = root
         self.filelist = flist_reader(os.path.join(root, flist))
         self.transform = transform
         self.target_transform = target_transform
+        self.pair_transform = pair_transform
         self.loader = loader
 
 
@@ -47,6 +49,9 @@ class BoneTumor_Dataset(data.Dataset):
         impath, tarpath = self.filelist[index]
         img = self.loader(os.path.join(self.root, impath))
         tar = self.loader(os.path.join(self.root, tarpath))
+
+        if self.pair_transform is not None:
+            img, tar = self.pair_transform(img, tar)
 
         if self.transform is not None:
             img = self.transform(img)

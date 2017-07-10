@@ -2,6 +2,7 @@ import numpy as np
 from visdom import Visdom
 import datetime
 import torch
+import pdb
 
 class VisdomPlotter(object):
     """Plots to Visdom"""
@@ -50,10 +51,17 @@ class VisdomPlotter(object):
         
         if isinstance(img, torch.autograd.Variable):
             img = img.data
-        if isinstance(img, torch.Tensor):
+        if isinstance(img, torch.Tensor) or isinstance(img, torch.LongTensor):
             if img.is_cuda:
                 img = img.cpu()
             img = img.numpy()
+            img = img.astype('float32')
+
+
+        #if img.max() > 255:
+        #    img = img.astype('uint16')
+        #else:
+        #    img = img.astype('uint8')
 
         self.viz.image(
                 img,

@@ -53,7 +53,8 @@ class PairCompose(object):
 
     def __call__(self, *args):
         for t in self.transforms:
-            return t(*args)
+            args = t(*args)
+        return args
 
 
 class ToTensor(object):

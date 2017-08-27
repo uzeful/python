@@ -24,4 +24,4 @@ def get_logger(logPath='./logs', fileName=None, logLevel="INFO", is_Del=True):
     glog.setLevel(logLevel)
 
     glog.info("Happy Logging!")
-    return glog
+    return glog, logFile

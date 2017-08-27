@@ -70,11 +70,11 @@ class FuseLmdbDataset(data.Dataset):
         if self.pair_transform:
             img1, img2, target = self.pair_transform(img1, img2, target)
 
-        if self.input_transform is not None:
+        if self.input_transform:
             img1 = self.input_transform(img1)
             img2 = self.input_transform(img2)
 
-        if self.target_transform is not None:
+        if self.target_transform:
             target = self.target_transform(target)
 
         return img1, img2, target

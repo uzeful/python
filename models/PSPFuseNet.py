@@ -106,7 +106,7 @@ class Bottleneck(nn.Module):
 # PSPNet Pooling Branch
 class PSPDec(nn.Module):
 
-    def __init__(self, in_features, out_features, downsize, upsize=60, mode='bilinear'):
+    def __init__(self, in_features, out_features, downsize, upsize, mode='bilinear'):
         super(PSPDec, self).__init__()
 
         self.averpool = nn.AvgPool2d(downsize, stride=downsize)
@@ -127,7 +127,7 @@ class PSPDec(nn.Module):
 
 class PSPFuseNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=21, scale_factor=8, mode='bilinear'):
+    def __init__(self, block, layers, num_classes=21, downsizes=[60, 30, 20, 10], upsize=60, scale_factor=8, mode='bilinear'):
         #self.inplanes = 64   # Original Res101
         self.inplanes = 128   # PSPNet Res101
         super(PSPFuseNet, self).__init__()
@@ -139,11 +139,11 @@ class PSPFuseNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], padding=2, dilation=2)
         self.layer4 = self._make_layer(block, 512, layers[3], padding=4, dilation=4)
 
-        self.layer5a = PSPDec(2048*2, 512, 60)
-        self.layer5b = PSPDec(2048*2, 512, 30)
-        self.layer5c = PSPDec(2048*2, 512, 20)
-        self.layer5d = PSPDec(2048*2, 512, 10)
-        self.layer5 = PSPDec(2048*2, 2048, 1)
+        self.layer5a = PSPDec(2048*2, 512, downsizes[0], upsize)
+        self.layer5b = PSPDec(2048*2, 512, downsizes[1], upsize)
+        self.layer5c = PSPDec(2048*2, 512, downsizes[2], upsize)
+        self.layer5d = PSPDec(2048*2, 512, downsizes[3], upsize)
+        self.layer5 = PSPDec(2048*2, 2048, 1, upsize)
         
         self.fusion = Endblock(2048*2, 512, num_classes=num_classes)
         self.upsample = nn.Upsample(scale_factor=scale_factor, mode=mode)
@@ -208,12 +208,12 @@ class PSPFuseNet(nn.Module):
         return out
 
 
-def pspnet101(pretrained=False, num_classes=21, **kwargs):
+def pspnet101(pretrained=False, num_classes=21, downsizes=[60, 30, 20, 10], upsize=60, **kwargs):
     """Constructs a PSPNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = PSPFuseNet(Bottleneck, [3, 4, 23, 3], num_classes, **kwargs)
+    model = PSPFuseNet(Bottleneck, [3, 4, 23, 3], num_classes, downsizes, upsize, **kwargs)
     if pretrained:
         new_dict = {}
         model_dict = model.state_dict()

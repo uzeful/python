@@ -1,12 +1,9 @@
 """
 Siamese network for image fusion
 """
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
-from torch.autograd import Function
 
 class myFusionNet1(nn.Module):
     """
@@ -87,8 +84,6 @@ class myFusionNet2(nn.Module):
     def forward(self, input):
         # get channels
         n_ch = input.data.size()[1]
-        #print(input.data.size())
-        #print(n_ch)
         input1 = input[:, :n_ch // 2, :, :]
         input2 = input[:, n_ch // 2 :, :, :]
         

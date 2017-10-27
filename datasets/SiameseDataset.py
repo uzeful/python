@@ -5,7 +5,6 @@ Siamese Dataset Preparation
 import torch.utils.data as data
 from PIL import Image
 import os
-#import os.path
 
 def default_loader(path):
     return Image.open(path).convert('RGB')

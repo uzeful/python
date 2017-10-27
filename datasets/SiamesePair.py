@@ -4,9 +4,7 @@
 
 import torch
 import torch.utils.data as data
-from torchvision import datasets, transforms
 from PIL import Image
-
 
 def default_loader(path):
     return Image.open(path).convert('RGB')
